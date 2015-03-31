@@ -9,6 +9,8 @@ import java.net.URLConnection;
 
 public class Connection {
 
+//Reference:  http://www.mkyong.com/java/java-httpurlconnection-follow-redirect-example/
+	
 	public static String get(String url){
 		URL urlConnection;
         StringBuffer html = null;
