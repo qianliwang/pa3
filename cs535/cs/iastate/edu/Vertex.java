@@ -54,10 +54,14 @@ public class Vertex implements Comparable<Vertex>{
 	public void setNextVertices(ArrayList<Vertex> nextVertices) {
 		this.nextVertices = nextVertices;
 	}
-	@Override
-	public int hashCode(){
-		return this.name.hashCode();
+	
+	public String getName() {
+		return name;
 	}
+	public void setName(String name) {
+		this.name = name;
+	}
+
 	@Override
 	public String toString(){
 		return this.name+":"+"InDegree:"+this.inDegree+";OutDegree:"+this.outDegree;
@@ -68,7 +72,7 @@ public class Vertex implements Comparable<Vertex>{
 		if(this.getRank()==v.getRank()){
 			return 0;
 		}else{
-			return this.getRank() > v.getRank() ? 1 : -1;
+			return this.getRank() < v.getRank() ? 1 : -1;
 		}
 	}
 	
@@ -81,7 +85,22 @@ public class Vertex implements Comparable<Vertex>{
 				return 0;
 			}
 			else{
-				return v1.getInDegree() > v2.getInDegree() ? 1 : -1;
+				return v1.getInDegree() < v2.getInDegree() ? 1 : -1;
+			}
+
+		}
+	};
+	
+	public static Comparator<Vertex> outDegreeComparator 
+    = new Comparator<Vertex>() {
+
+		public int compare(Vertex v1, Vertex v2) {
+
+			if (v1.getOutDegree() == v2.getOutDegree()){
+				return 0;
+			}
+			else{
+				return v1.getOutDegree() < v2.getOutDegree() ? 1 : -1;
 			}
 
 		}
