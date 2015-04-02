@@ -19,7 +19,7 @@ public class Test {
 		graph.topKOutDegree(10);
 		
 		PageRank pr = new PageRank(graph);
-		pr.pageRank((float)0.85, (float)0.0005, graph);
+		pr.pageRank((float)0.85, (float)0, graph);
 		pr.topKPageRank(10);
 	}
 }

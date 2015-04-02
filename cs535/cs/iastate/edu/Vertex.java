@@ -10,7 +10,7 @@ public class Vertex implements Comparable<Vertex>{
 	private int inDegree;
 	private int outDegree;
 	
-	private float rank;
+	private double rank;
 	
 	private ArrayList<Vertex> nextVertices;
 	
@@ -41,10 +41,10 @@ public class Vertex implements Comparable<Vertex>{
 		this.outDegree = outDegree;
 	}
 	
-	public float getRank() {
+	public double getRank() {
 		return rank;
 	}
-	public void setRank(float rank) {
+	public void setRank(double rank) {
 		this.rank = rank;
 	}
 	

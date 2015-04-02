@@ -1,5 +1,6 @@
 package pa3.cs535.cs.iastate.edu;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.TreeSet;
 
@@ -12,7 +13,7 @@ public class PageRank {
 		this.graph = graph;
 	}
 	
-	public float pageRankOf(String vertex){
+	public double pageRankOf(String vertex){
 		Vertex v = this.graph.retrieveVertex(vertex);
 		return v.getRank();
 	}
@@ -32,57 +33,76 @@ public class PageRank {
 		}
 	}
 	
-	public void pageRank(float beta,float sigma,Graph graph){
+	public void pageRank(double beta,double sigma,Graph graph){
 		boolean converge = false;
 		Vertex v;
-		float initRank = (float) (1.0/graph.getGraphSize());
+		double initRank = (double) (1.0/graph.getGraphSize());
 		for(Integer i:graph.getGraphMap().keySet()){
 			v = graph.getGraphMap().get(i);
 			v.setRank(initRank);
 		}
-		float currentRank[] = new float[graph.getGraphSize()];
-		float nextRank[] = new float[graph.getGraphSize()];
+		double currentRank[] = new double[graph.getGraphSize()];
+		double nextRank[] = new double[graph.getGraphSize()];
 		int count = 0;
 		while(!converge){
 			currentRank = graph.getVertexRankVector(currentRank);
 			singleRound(graph,beta);
 			nextRank = graph.getVertexRankVector(nextRank);
+			double sum = 0;
+			
+			for(int i=0;i<nextRank.length;i++){
+				sum = sum + nextRank[i];
+			}
+		
+//				System.err.println(sum);
+			
+			
 			if(diffVertexVectors(currentRank,nextRank,sigma)){
 				converge = true;
 			}
 			count++;
-			System.out.println(count);
+			
 		}
-		for(int i=0;i<nextRank.length;i++){
-//			System.out.println(nextRank[i]);
-		}
+		System.out.println("\nIt takes "+ count+" rounds to converge!!\n");
+		
 	}
 	
-	private void singleRound(Graph graph,float beta){
+	private void singleRound(Graph graph,double beta){
 		
 		Vertex v;
 		Vertex w;
-		float tempRank;
+		double tempRank;
 		int numOfVertice = graph.getGraphSize();
-		float baseRank = 1-beta;
+		double baseRank = (1-beta)/numOfVertice;
+		double tempRanks[] = new double[numOfVertice];
+		Arrays.fill(tempRanks, baseRank);
+		
+		double oldRanks[] = new double[numOfVertice];
+		graph.getVertexRankVector(oldRanks);
+		
+		graph.setVertexRankVector(tempRanks);
+		double vertexOldRank;
+		int count = 0;
 		for(Integer i:graph.getGraphMap().keySet()){
 			v = graph.getGraphMap().get(i);
+			vertexOldRank = oldRanks[count];
 			if(v.getOutDegree()==0){
-				tempRank = beta*v.getRank()/numOfVertice;
+				tempRank = beta*vertexOldRank/numOfVertice;
 				for(Integer j:graph.getGraphMap().keySet()){	
 					w = graph.getGraphMap().get(j);
-					w.setRank(baseRank+tempRank);
+					w.setRank(w.getRank()+tempRank);
 				}
 			}else{
-				tempRank = beta*v.getRank()/v.getNextVertices().size();
+				tempRank = beta*vertexOldRank/v.getNextVertices().size();
 				for(Vertex x:v.getNextVertices()){	
-					x.setRank(baseRank+tempRank);
+					x.setRank(x.getRank()+tempRank);
 				}
 			}
+			count++;
 		}
 	} 
 	
-	private boolean diffVertexVectors(float[] v1,float[] v2,float sigma){
+	private boolean diffVertexVectors(double[] v1,double[] v2,double sigma){
 		boolean result = true;
 		if(v1.length!=v2.length){
 			System.err.println("Vectors have different length!!!");

@@ -133,7 +133,7 @@ public class Graph {
 		}
 	}
 	
-	public float[] getVertexRankVector(float[] rankVector){
+	public double[] getVertexRankVector(double[] rankVector){
 		Vertex v;
 		int count = 0;
 		
@@ -143,6 +143,17 @@ public class Graph {
 			count++;
 		}
 		return rankVector;
+	}
+	
+	public void setVertexRankVector(double[] rankVector){
+		Vertex v;
+		int count = 0;
+		
+		for(Integer i:this.graphMap.keySet()){
+			v = this.graphMap.get(i);
+			v.setRank(rankVector[count]);
+			count++;
+		}
 	}
 	
 	private ArrayList<Vertex> topK(int k,int type){

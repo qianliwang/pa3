@@ -6,6 +6,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.TreeSet;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -18,6 +19,9 @@ public class WikiCrawler {
 	
 	private Queue<String> linkQueue;
 	private ArrayList<String> edges;
+	
+	private TreeSet<String> visitedLinks;
+	private TreeSet<String> noKeywordLinks;
 	
 	private String urlPrefix;
 	
@@ -35,46 +39,59 @@ public class WikiCrawler {
 		}
 		
 		linkQueue = new LinkedList();
+		linkQueue.add(this.seedUrl);
+		
+		visitedLinks = new TreeSet<String>();
+		visitedLinks.add(this.seedUrl);
+		
+		noKeywordLinks = new TreeSet<String>();
 		edges = new ArrayList<String>();
 		urlPrefix = "http://en.wikipedia.org";
-		linkQueue.add(this.seedUrl);
 	}
 	
 	public void crawl(){
-		String currentPageLink;
-		String pageContent;
 		
-		while(!this.linkQueue.isEmpty()&&this.edges.size()<=this.maxSites){
+		String currentPageLink;
+		
+		while(!this.linkQueue.isEmpty()&&this.visitedLinks.size()<=this.maxSites){
 			currentPageLink = linkQueue.poll();
 			System.out.println(currentPageLink);
-			if(isContainKeywords(currentPageLink,this.keywords)){
-				extractLinks(currentPageLink,this.linkQueue,this.edges);
+			if(isContainKeywords(currentPageLink)){
+				extractLinks(currentPageLink);
 			}
 		}
 		
 		writeToFile(this.edges);
 	}
 	
-	private boolean isContainKeywords(String url,ArrayList<String> keywords){
-		String rawTextUrl = "http://en.wikipedia.org/w/index.php?title=$$$$&action=raw";
-		String tokens[] = url.split("/");
-		String title = tokens[tokens.length-1];
-		String newString = rawTextUrl.replace("$$$$", title);
-		System.out.println(newString);
-		
-		String pageContent = Connection.get(newString);
+	private boolean isContainKeywords(String url){
 		
 		boolean isContainKeywords = true;
-		for(String keyword:keywords){
-			if(!pageContent.contains(keyword)){
-				isContainKeywords = false;
-				break;
+		
+		if(!this.noKeywordLinks.contains(url)){
+			String rawTextUrl = "http://en.wikipedia.org/w/index.php?title=$$$$&action=raw";
+			String tokens[] = url.split("/");
+			String title = tokens[tokens.length-1];
+			String newString = rawTextUrl.replace("$$$$", title);
+			System.out.println(newString);
+			
+			String pageContent = Connection.get(newString);
+			
+			
+			for(String keyword:this.keywords){
+				if(!pageContent.contains(keyword)){
+					isContainKeywords = false;
+					this.noKeywordLinks.add(url);
+					break;
+				}
 			}
 		}
+		
+		
 		return isContainKeywords;
 	}
 	
-	private void extractLinks(String url,Queue queue,ArrayList<String> edges){
+	private void extractLinks(String url){
 		String pageContent = Connection.get(this.urlPrefix+url);
 		ArrayList<String> paraList = new ArrayList<String>();
 		extractTags("<p>(.+?)</p>",pageContent,paraList);
@@ -86,11 +103,12 @@ public class WikiCrawler {
 				
 //		Be careful when testing!!!!!
 				
-				if(!link.contains("#")&&!link.contains(":")&&!edges.contains(link)&&isContainKeywords(link,this.keywords)){
+				if(!link.contains("#")&&!link.contains(":")&&!this.visitedLinks.contains(link)&&isContainKeywords(link)){
 					
-					queue.add(link);
+					this.linkQueue.add(link);
+					this.visitedLinks.add(link);
 					temp = url + "\t" + link;
-					edges.add(temp);
+					this.edges.add(temp);
 				}
 			}
 		}
