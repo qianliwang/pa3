@@ -11,12 +11,14 @@ public class Connection {
 
 //Reference:  http://www.mkyong.com/java/java-httpurlconnection-follow-redirect-example/
 	
+	private static int count;
+	
 	public static String get(String url){
 		URL urlConnection;
         StringBuffer html = null;
         String inputLine;
 		try {
-			Thread.sleep(100);
+			
 			urlConnection = new URL(url);
 			HttpURLConnection conn = (HttpURLConnection) urlConnection.openConnection();
 			conn.setReadTimeout(5000);
@@ -24,6 +26,12 @@ public class Connection {
 			conn.addRequestProperty("User-Agent", "Mozilla");
 			conn.addRequestProperty("Referer", "google.com");
 		 
+			count++;
+			if(count%100 == 0){
+				Thread.sleep(5000);
+				System.out.println("Sleep 5 seconds...");
+			}
+			
 			System.out.println("Request URL ... " + url);
 		 
 			boolean redirect = false;

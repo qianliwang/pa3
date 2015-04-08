@@ -20,7 +20,7 @@ public class WikiCrawler {
 	private Queue<String> linkQueue;
 	private ArrayList<String> edges;
 	
-	private TreeSet<String> visitedLinks;
+	private ArrayList<String> visitedLinks;
 	private TreeSet<String> noKeywordLinks;
 	
 	private String urlPrefix;
@@ -41,7 +41,7 @@ public class WikiCrawler {
 		linkQueue = new LinkedList();
 		linkQueue.add(this.seedUrl);
 		
-		visitedLinks = new TreeSet<String>();
+		visitedLinks = new ArrayList<String>();
 		visitedLinks.add(this.seedUrl);
 		
 		noKeywordLinks = new TreeSet<String>();
@@ -68,24 +68,23 @@ public class WikiCrawler {
 		
 		boolean isContainKeywords = true;
 		
-		if(!this.noKeywordLinks.contains(url)){
-			String rawTextUrl = "http://en.wikipedia.org/w/index.php?title=$$$$&action=raw";
-			String tokens[] = url.split("/");
-			String title = tokens[tokens.length-1];
-			String newString = rawTextUrl.replace("$$$$", title);
-			System.out.println(newString);
-			
-			String pageContent = Connection.get(newString);
-			
-			
-			for(String keyword:this.keywords){
-				if(!pageContent.contains(keyword)){
-					isContainKeywords = false;
-					this.noKeywordLinks.add(url);
-					break;
-				}
+		String rawTextUrl = "http://en.wikipedia.org/w/index.php?title=$$$$&action=raw";
+		String tokens[] = url.split("/");
+		String title = tokens[tokens.length-1];
+		String newString = rawTextUrl.replace("$$$$", title);
+		System.out.println(newString);
+		
+		String pageContent = Connection.get(newString);
+		pageContent = pageContent.toLowerCase();
+		
+		for(String keyword:this.keywords){
+			if(!pageContent.contains(keyword)){
+				isContainKeywords = false;
+				this.noKeywordLinks.add(url);
+				break;
 			}
 		}
+		
 		
 		
 		return isContainKeywords;
@@ -103,13 +102,15 @@ public class WikiCrawler {
 				
 //		Be careful when testing!!!!!
 				
-				if(!link.contains("#")&&!link.contains(":")&&!this.visitedLinks.contains(link)&&isContainKeywords(link)){
-					
-					this.linkQueue.add(link);
-					this.visitedLinks.add(link);
-					temp = url + "\t" + link;
-					this.edges.add(temp);
-				}
+				if(!link.contains("#")&&!link.contains(":")&&!this.visitedLinks.contains(link)&&!this.noKeywordLinks.contains(link)){
+						if(isContainKeywords(link)){
+							this.linkQueue.add(link);
+							this.visitedLinks.add(link);
+							temp = url + "\t" + link;
+							this.edges.add(temp);
+						
+						}
+					}
 			}
 		}
 		paraList.clear();
