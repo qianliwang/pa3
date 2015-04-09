@@ -69,7 +69,7 @@ public class WikiCrawler {
 		
 			subLinks = extractLinks(currentPageLink);
 			for(String link:subLinks){
-				temp = currentPageLink + "\t" + link;
+				temp = currentPageLink + " " + link;
 				this.edges.add(temp);
 			}
 			this.linkQueue.addAll(subLinks);
