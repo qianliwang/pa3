@@ -28,12 +28,14 @@ public class Connection {
 		 
 			count++;
 			if(count%100 == 0){
+				System.err.println("Sleep 5 seconds...");
 				Thread.sleep(5000);
-				System.out.println("Sleep 5 seconds...");
 			}
 			
 			System.out.println("Request URL ... " + url);
-		 
+			
+			html = new StringBuffer();
+			
 			boolean redirect = false;
 		 
 			// normally, 3xx is redirect
@@ -68,7 +70,7 @@ public class Connection {
 		 
 			BufferedReader in = new BufferedReader(
 		                              new InputStreamReader(conn.getInputStream()));
-			html = new StringBuffer();
+			
 		 
 			while ((inputLine = in.readLine()) != null) {
 				html.append(inputLine);
@@ -76,11 +78,10 @@ public class Connection {
 			in.close();
 		 
 //			System.out.println("URL Content... \n" + html.toString());
-			System.out.println("Done");
-		} catch (IOException e) {	
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+//			System.out.println("Done");
+		}catch (Exception e){
+			System.err.println("Bad URL");
+			html.append("  ");
 		}
         
 		return html.toString();

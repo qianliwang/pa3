@@ -20,10 +20,12 @@ public class WikiCrawler {
 	private Queue<String> linkQueue;
 	private ArrayList<String> edges;
 	
-	private ArrayList<String> visitedLinks;
+	private TreeSet<String> visitedLinks;
 	private TreeSet<String> noKeywordLinks;
 	
 	private String urlPrefix;
+	
+	private String robotsTXT;
 	
 	public WikiCrawler(){
 		
@@ -41,25 +43,37 @@ public class WikiCrawler {
 		linkQueue = new LinkedList();
 		linkQueue.add(this.seedUrl);
 		
-		visitedLinks = new ArrayList<String>();
+		visitedLinks = new TreeSet<String>();
 		visitedLinks.add(this.seedUrl);
 		
 		noKeywordLinks = new TreeSet<String>();
 		edges = new ArrayList<String>();
 		urlPrefix = "http://en.wikipedia.org";
+		robotsTXT = Connection.get(urlPrefix+"/robots.txt");
 	}
 	
 	public void crawl(){
 		
 		String currentPageLink;
-		
-		while(!this.linkQueue.isEmpty()&&this.visitedLinks.size()<=this.maxSites){
+		int count = 1;
+		ArrayList<String> subLinks;
+		String temp;
+		long startTime = System.currentTimeMillis();
+		while(!this.linkQueue.isEmpty()&&count<=this.maxSites){
 			currentPageLink = linkQueue.poll();
-			System.out.println(currentPageLink);
-			if(isContainKeywords(currentPageLink)){
-				extractLinks(currentPageLink);
+//			System.out.println(currentPageLink);
+		
+			subLinks = extractLinks(currentPageLink);
+			for(String link:subLinks){
+				temp = currentPageLink + "\t" + link;
+				this.edges.add(temp);
 			}
+			this.linkQueue.addAll(subLinks);
+			this.visitedLinks.addAll(subLinks);
+			count++;
 		}
+		long endTime = System.currentTimeMillis();
+		System.out.println("Total Time is "+ (endTime-startTime));
 		
 		writeToFile(this.edges);
 	}
@@ -72,7 +86,7 @@ public class WikiCrawler {
 		String tokens[] = url.split("/");
 		String title = tokens[tokens.length-1];
 		String newString = rawTextUrl.replace("$$$$", title);
-		System.out.println(newString);
+//		System.out.println(newString);
 		
 		String pageContent = Connection.get(newString);
 		pageContent = pageContent.toLowerCase();
@@ -80,49 +94,49 @@ public class WikiCrawler {
 		for(String keyword:this.keywords){
 			if(!pageContent.contains(keyword)){
 				isContainKeywords = false;
-				this.noKeywordLinks.add(url);
 				break;
 			}
 		}
 		
-		
-		
 		return isContainKeywords;
 	}
 	
-	private void extractLinks(String url){
+	private ArrayList<String> extractLinks(String url){
 		String pageContent = Connection.get(this.urlPrefix+url);
-		ArrayList<String> paraList = new ArrayList<String>();
-		extractTags("<p>(.+?)</p>",pageContent,paraList);
+		ArrayList<String> paragraphList = new ArrayList<String>();
+		extractTags("<p>(.+?)</p>",pageContent,paragraphList);
 		ArrayList<String> linkList = new ArrayList<String>();
-		String temp = "";
-		for(String para:paraList){
-			extractTags("href=\"(.+?)\"",para,linkList);
-			for(String link:linkList){
-				
-//		Be careful when testing!!!!!
-				
-				if(!link.contains("#")&&!link.contains(":")&&!this.visitedLinks.contains(link)&&!this.noKeywordLinks.contains(link)){
-						if(isContainKeywords(link)){
-							this.linkQueue.add(link);
-							this.visitedLinks.add(link);
-							temp = url + "\t" + link;
-							this.edges.add(temp);
-						
+		ArrayList<String> subLinks = new ArrayList<String>();
+
+		for (String paragraph : paragraphList) {
+			extractTags("href=\"(.+?)\"", paragraph, linkList);
+			for (String link : linkList) {
+
+				// Be careful when testing!!!!!
+
+				if (!link.contains("#") && !link.contains(":")&& !robotsTXT.contains(link)&& !this.noKeywordLinks.contains(link)) {
+					if (!subLinks.contains(link)) {
+						if(this.visitedLinks.contains(link)){
+							subLinks.add(link);
+						}else{
+							if (isContainKeywords(link)) {
+								subLinks.add(link);
+//								this.visitedLinks.add(link);
+							}else{
+								this.noKeywordLinks.add(link);
+							}
 						}
-					}
+					} 
+				}
 			}
 		}
-		paraList.clear();
+		paragraphList.clear();
 		linkList.clear();
-/*		
-		Pattern p = Pattern.compile("<p>(.+?)</p>");
-		Matcher m = p.matcher(pageContent);
-		String cu
-		while(m.find()){
-			
-		}
-*/
+		paragraphList = null;
+		linkList = null;
+		
+		return subLinks;
+
 	}
 	
 	private void extractTags(String pattern,String target,ArrayList<String> result){
