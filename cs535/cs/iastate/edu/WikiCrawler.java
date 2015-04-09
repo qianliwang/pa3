@@ -1,6 +1,9 @@
 package pa3.cs535.cs.iastate.edu;
 
+import java.io.BufferedWriter;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
@@ -58,6 +61,7 @@ public class WikiCrawler {
 		int count = 1;
 		ArrayList<String> subLinks;
 		String temp;
+		writeToFile(String.valueOf(this.maxSites));
 		long startTime = System.currentTimeMillis();
 		while(!this.linkQueue.isEmpty()&&count<=this.maxSites){
 			currentPageLink = linkQueue.poll();
@@ -71,11 +75,13 @@ public class WikiCrawler {
 			this.linkQueue.addAll(subLinks);
 			this.visitedLinks.addAll(subLinks);
 			count++;
+			writeToFile(this.edges);
+			this.edges.clear();
 		}
 		long endTime = System.currentTimeMillis();
 		System.out.println("Total Time is "+ (endTime-startTime));
 		
-		writeToFile(this.edges);
+		
 	}
 	
 	private boolean isContainKeywords(String url){
@@ -119,11 +125,13 @@ public class WikiCrawler {
 						if(this.visitedLinks.contains(link)){
 							subLinks.add(link);
 						}else{
-							if (isContainKeywords(link)) {
-								subLinks.add(link);
-//								this.visitedLinks.add(link);
-							}else{
-								this.noKeywordLinks.add(link);
+							if(this.visitedLinks.size()<this.maxSites){
+								if (isContainKeywords(link)) {
+									subLinks.add(link);
+//									this.visitedLinks.add(link);
+								}else{
+									this.noKeywordLinks.add(link);
+								}
 							}
 						}
 					} 
@@ -151,7 +159,7 @@ public class WikiCrawler {
 	private void writeToFile(ArrayList<String> lines){
 		PrintWriter writer;
 		try {
-			writer = new PrintWriter(this.outputFileName, "UTF-8");
+			writer = new PrintWriter(new BufferedWriter(new FileWriter(this.outputFileName, true)));
 			for (String line : lines) {
 				writer.println(line);
 			}
@@ -160,6 +168,24 @@ public class WikiCrawler {
 		} catch (FileNotFoundException e) {
 			e.printStackTrace();
 		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	private void writeToFile(String line){
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter(new BufferedWriter(new FileWriter(this.outputFileName, true)));
+			writer.println(line);
+			writer.close();
+
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
