@@ -58,23 +58,24 @@ public class WikiCrawler {
 	public void crawl(){
 		
 		String currentPageLink;
-		int count = 1;
-		ArrayList<String> subLinks;
+		TreeSet<String> subLinks;
 		String temp;
 		writeToFile(String.valueOf(this.maxSites));
 		long startTime = System.currentTimeMillis();
-		while(!this.linkQueue.isEmpty()&&count<=this.maxSites){
+		while(!this.linkQueue.isEmpty()){
 			currentPageLink = linkQueue.poll();
 //			System.out.println(currentPageLink);
-		
 			subLinks = extractLinks(currentPageLink);
 			for(String link:subLinks){
 				temp = currentPageLink + " " + link;
 				this.edges.add(temp);
+				if(!this.visitedLinks.contains(link)){
+					this.visitedLinks.add(link);
+					this.linkQueue.add(link);
+				}
 			}
-			this.linkQueue.addAll(subLinks);
-			this.visitedLinks.addAll(subLinks);
-			count++;
+//			this.linkQueue.addAll(subLinks);
+//			this.visitedLinks.addAll(subLinks);
 			writeToFile(this.edges);
 			this.edges.clear();
 		}
@@ -107,39 +108,39 @@ public class WikiCrawler {
 		return isContainKeywords;
 	}
 	
-	private ArrayList<String> extractLinks(String url){
+	private TreeSet<String> extractLinks(String url){
 		String pageContent = Connection.get(this.urlPrefix+url);
-		ArrayList<String> paragraphList = new ArrayList<String>();
+		TreeSet<String> paragraphList = new TreeSet<String>();
 		extractTags("<p>(.+?)</p>",pageContent,paragraphList);
-		ArrayList<String> linkList = new ArrayList<String>();
-		ArrayList<String> subLinks = new ArrayList<String>();
+		TreeSet<String> linkList = new TreeSet<String>();
+		TreeSet<String> subLinks = new TreeSet<String>();
 
 		for (String paragraph : paragraphList) {
-			extractTags("href=\"(.+?)\"", paragraph, linkList);
+			extractTags("href=\"([^:#]+?)\"", paragraph, linkList);
 			for (String link : linkList) {
 
 				// Be careful when testing!!!!!
 
-				if (!link.contains("#") && !link.contains(":")&& !robotsTXT.contains(link)&& !this.noKeywordLinks.contains(link)) {
-					if (!subLinks.contains(link)) {
+				if (!robotsTXT.contains(link)&& !this.noKeywordLinks.contains(link)) {
+					if(!subLinks.contains(link)){
 						if(this.visitedLinks.contains(link)){
 							subLinks.add(link);
 						}else{
 							if(this.visitedLinks.size()<this.maxSites){
 								if (isContainKeywords(link)) {
 									subLinks.add(link);
-//									this.visitedLinks.add(link);
+//										this.visitedLinks.add(link);
 								}else{
 									this.noKeywordLinks.add(link);
 								}
 							}
 						}
-					} 
+					}
 				}
 			}
+			linkList.clear();
 		}
 		paragraphList.clear();
-		linkList.clear();
 		paragraphList = null;
 		linkList = null;
 		
@@ -147,7 +148,7 @@ public class WikiCrawler {
 
 	}
 	
-	private void extractTags(String pattern,String target,ArrayList<String> result){
+	private void extractTags(String pattern,String target,TreeSet<String> result){
 		Pattern p = Pattern.compile(pattern);
 		Matcher m = p.matcher(target);
 		

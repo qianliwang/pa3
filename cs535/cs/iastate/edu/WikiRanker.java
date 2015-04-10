@@ -9,6 +9,7 @@ public class WikiRanker {
 	public static void main(String args[]){
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String graphFilePath;
+		int k = 100;
 		System.out.println("Please input the graph file path:");
 		try {
 			graphFilePath = br.readLine();
@@ -16,16 +17,16 @@ public class WikiRanker {
 //			String graphFileName = "D:\\Dropbox\\Courses\\CS535x\\ProgrammingAssignment\\p3\\PavanWikiTennis.txt";;
 			Graph graph = new Graph(graphFilePath);
 //			graph.printGraph();
-			graph.topKInDegree(100);
+			graph.topKInDegree(k);
 			System.out.println();
-			graph.topKOutDegree(100);
+			graph.topKOutDegree(k);
 			
 			PageRank pr = new PageRank(graph);
 			pr.pageRank((float)0.85, (float)0.1, graph);
-			pr.topKPageRank(100);
+			pr.topKPageRank(k);
 			
 			pr.pageRank((float)0.85, (float)0.05, graph);
-			pr.topKPageRank(100);
+			pr.topKPageRank(k);
 			
 		} catch (IOException e) {
 			e.printStackTrace();
