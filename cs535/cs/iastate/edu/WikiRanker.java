@@ -9,7 +9,9 @@ public class WikiRanker {
 	public static void main(String args[]){
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 		String graphFilePath;
+		
 		int k = 100;
+		
 		System.out.println("Please input the graph file path:");
 		try {
 			graphFilePath = br.readLine();
