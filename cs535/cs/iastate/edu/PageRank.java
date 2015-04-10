@@ -1,5 +1,6 @@
 package pa3.cs535.cs.iastate.edu;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.TreeSet;
@@ -18,7 +19,7 @@ public class PageRank {
 		return v.getRank();
 	}
 	
-	public void topKPageRank(int k){
+	public ArrayList<Vertex> topKPageRank(int k){
 		TreeSet<Vertex> tsVertices = new TreeSet<Vertex>();
 		for(Integer i:this.graph.getGraphMap().keySet()){
 			tsVertices.add(this.graph.getGraphMap().get(i));
@@ -26,11 +27,14 @@ public class PageRank {
 		Iterator<Vertex> itr=tsVertices.iterator();
 		int count=0;
 		Vertex v;
+		ArrayList<Vertex> topKPageRank = new ArrayList<Vertex>();
 		while(count<k){
 			v = itr.next();
 			System.out.println(v.getName()+":"+v.getRank());
+			topKPageRank.add(v);
 			count++;
 		}
+		return topKPageRank;
 	}
 	
 	public void pageRank(double beta,double sigma,Graph graph){

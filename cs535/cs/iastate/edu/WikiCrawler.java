@@ -69,7 +69,7 @@ public class WikiCrawler {
 			for(String link:subLinks){
 				temp = currentPageLink + " " + link;
 				this.edges.add(temp);
-				if(!this.visitedLinks.contains(link)){
+				if(!this.visitedLinks.contains(link) && this.visitedLinks.size()<=this.maxSites){
 					this.visitedLinks.add(link);
 					this.linkQueue.add(link);
 				}
@@ -121,7 +121,7 @@ public class WikiCrawler {
 
 				// Be careful when testing!!!!!
 
-				if (!robotsTXT.contains(link)&& !this.noKeywordLinks.contains(link)) {
+				if (!robotsTXT.contains(link) && !this.noKeywordLinks.contains(link)) {
 					if(!subLinks.contains(link)){
 						if(this.visitedLinks.contains(link)){
 							subLinks.add(link);
@@ -129,7 +129,7 @@ public class WikiCrawler {
 							if(this.visitedLinks.size()<this.maxSites){
 								if (isContainKeywords(link)) {
 									subLinks.add(link);
-//										this.visitedLinks.add(link);
+//									this.visitedLinks.add(link);
 								}else{
 									this.noKeywordLinks.add(link);
 								}

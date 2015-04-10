@@ -120,17 +120,23 @@ public class Graph {
 		return edgeCount;
 	}
 	
-	public void topKInDegree(int k){
+	public ArrayList<Vertex> topKInDegree(int k){
 		ArrayList<Vertex> vertices = topK(k,TOPKINDEGREE);
+		ArrayList<Vertex> kIndegree = new ArrayList<Vertex>();
 		for(int i=0;i<k;i++){
 			System.out.println(vertices.get(i));
+			kIndegree.add(vertices.get(i));
 		}
+		return kIndegree;
 	}
-	public void topKOutDegree(int k){
+	public ArrayList<Vertex> topKOutDegree(int k){
 		ArrayList<Vertex> vertices = topK(k,TOPKOUTDEGREE);
+		ArrayList<Vertex> kOutdegree = new ArrayList<Vertex>();
 		for(int i=0;i<k;i++){
 			System.out.println(vertices.get(i));
+			kOutdegree.add(vertices.get(i));
 		}
+		return kOutdegree;
 	}
 	
 	public double[] getVertexRankVector(double[] rankVector){
