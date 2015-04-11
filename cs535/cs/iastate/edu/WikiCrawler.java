@@ -68,10 +68,16 @@ public class WikiCrawler {
 			subLinks = extractLinks(currentPageLink);
 			for(String link:subLinks){
 				temp = currentPageLink + " " + link;
-				this.edges.add(temp);
-				if(!this.visitedLinks.contains(link) && this.visitedLinks.size()<=this.maxSites){
-					this.visitedLinks.add(link);
-					this.linkQueue.add(link);
+				if(this.visitedLinks.size()<this.maxSites){
+					this.edges.add(temp);
+					if(!this.visitedLinks.contains(link)){
+						this.visitedLinks.add(link);
+						this.linkQueue.add(link);
+					}
+				}else{
+					if(this.visitedLinks.contains(link)){
+						this.edges.add(temp);
+					}
 				}
 			}
 //			this.linkQueue.addAll(subLinks);
